@@ -1,46 +1,75 @@
 import React, { useState, useEffect } from "react";
 import Day from "./Day";
+import axios from "axios";
 
 export default function Calendar() {
   const [days, setDays] = useState([]);
-  const [selectedDay, setSelectedDay] = useState(null); // היום שנבחר להוספת אירוע
-  const [newEvent, setNewEvent] = useState(""); // שם האירוע החדש
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [newEvent, setNewEvent] = useState("");
 
   useEffect(() => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
+    const fetchEvents = async () => {
+      try {
+        const res = await axios.get("http://localhost:3001/events"); // כתובת השרת שלך
+        const eventsFromServer = res.data; // מערך של אירועים עם תאריכים
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const firstDayOfMonth = new Date(year, month, 1);
+        const lastDayOfMonth = new Date(year, month + 1, 0);
+        const tempDays = [];
 
-    const firstDayOfMonth = new Date(year, month, 1);
-    const lastDayOfMonth = new Date(year, month + 1, 0);
+        // ימים מהחודש הקודם
+        const startDayIndex = firstDayOfMonth.getDay();
+        for (let i = startDayIndex - 1; i >= 0; i--) {
+          tempDays.push({ date: new Date(year, month, -i), events: [] });
+        }
 
-    const tempDays = [];
+        // ימים מהחודש הנוכחי
+        for (let d = 1; d <= lastDayOfMonth.getDate(); d++) {
+          const date = new Date(year, month, d);
+          const dayEvents = eventsFromServer.filter(
+            (ev) => new Date(ev.date).toDateString() === date.toDateString()
+          );
+          tempDays.push({ date, events: dayEvents.map((ev) => ev.name) });
+        }
 
-    const startDayIndex = firstDayOfMonth.getDay();
-    for (let i = startDayIndex - 1; i >= 0; i--) {
-      tempDays.push({ date: new Date(year, month, -i), events: [] });
-    }
+        // ימים מהחודש הבא
+        const endDayIndex = lastDayOfMonth.getDay();
+        for (let i = 1; i < 7 - endDayIndex; i++) {
+          tempDays.push({ date: new Date(year, month + 1, i), events: [] });
+        }
 
-    for (let d = 1; d <= lastDayOfMonth.getDate(); d++) {
-      tempDays.push({ date: new Date(year, month, d), events: [] });
-    }
+        setDays(tempDays);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
 
-    const endDayIndex = lastDayOfMonth.getDay();
-    for (let i = 1; i < 7 - endDayIndex; i++) {
-      tempDays.push({ date: new Date(year, month + 1, i), events: [] });
-    }
-
-    setDays(tempDays);
+    fetchEvents();
   }, []);
 
-  const addEvent = () => {
+  const addEvent = async () => {
     if (!newEvent) return;
-    const updatedDays = days.map((day) =>
-      day === selectedDay ? { ...day, events: [...day.events, newEvent] } : day
-    );
-    setDays(updatedDays);
-    setNewEvent("");
-    setSelectedDay(null);
+
+    try {
+      const res = await axios.post("http://localhost:3001/events", {
+        name: newEvent,
+        date: selectedDay.date,
+      });
+      const eventFromServer = res.data;
+
+      const updatedDays = days.map((day) =>
+        day === selectedDay
+          ? { ...day, events: [...day.events, eventFromServer.name] }
+          : day
+      );
+      setDays(updatedDays);
+      setNewEvent("");
+      setSelectedDay(null);
+    } catch (error) {
+      console.error("Error adding event:", error);
+    }
   };
 
   const rows = [];
@@ -54,11 +83,7 @@ export default function Calendar() {
         {rows.map((week, index) => (
           <div key={index} style={{ display: "flex" }}>
             {week.map((day, idx) => (
-              <Day
-                key={idx}
-                day={day}
-                onClick={() => setSelectedDay(day)}
-              />
+              <Day key={idx} day={day} onClick={() => setSelectedDay(day)} />
             ))}
           </div>
         ))}
