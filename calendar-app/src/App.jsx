@@ -1,22 +1,20 @@
-// src/App.jsx
 import React from "react";
-import Calendar from "./components/Calendar";
+import { Routes, Route, Link } from "react-router-dom";
+import Calendar from "./components/Calendar.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import AddEvent from "./pages/AddEvent.jsx";
 
 export default function App() {
-  // לדוגמה – ימים עם תאריכים מה-1 עד 14 לחודש
-  const days = [];
-  const today = new Date();
-  for (let i = 1; i <= 31; i++) {
-    days.push({
-      date: new Date(today.getFullYear(), today.getMonth(), i),
-      events: [],
-    });
-  }
-
   return (
     <div>
-      <h1>לוח שנה</h1>
-      <Calendar days={days} />
+      <nav>
+        <Link to="/">Calendar</Link> | <Link to="/add">Add Event</Link>
+      </nav>
+      <Routes>
+        <Route path="/" element={<Calendar />} />
+        <Route path="/add" element={<AddEvent />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </div>
   );
 }
