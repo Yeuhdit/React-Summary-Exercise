@@ -1,7 +1,9 @@
+// calendar-app/src/components/Day.jsx
 import React from "react";
 
 export default function Day({ day, onClick }) {
   const isSaturday = day.date.getDay() === 6;
+
   const dayStyle = {
     border: "1px solid gray",
     padding: "10px",
@@ -12,8 +14,9 @@ export default function Day({ day, onClick }) {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: isSaturday ? "#b7e4c7" : "#fff",
     cursor: "pointer",
+    backgroundColor: !day.currentMonth ? "#f0f0f0" : isSaturday ? "#b7e4c7" : "#fff",
+    color: !day.currentMonth ? "#aaa" : "#000",
   };
 
   return (
