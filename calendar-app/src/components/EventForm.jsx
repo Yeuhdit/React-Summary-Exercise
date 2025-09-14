@@ -8,11 +8,12 @@ export default function EventForm({ date, onEventAdded }) {
   const addEvent = async () => {
     if (!eventName) return;
     try {
-      const res = await axios.post("http://localhost:3001/events", {
-        name: eventName,
-        date,
-      });
-      onEventAdded(res.data);
+      // ניתן להוסיף axios POST לשרת כאן
+      // const res = await axios.post("http://localhost:3001/events", { name: eventName, date });
+      // onEventAdded(res.data);
+
+      // לעת עתה מוסיפים ישירות ל־state
+      onEventAdded({ name: eventName, date });
       setEventName("");
     } catch (error) {
       console.error("Error adding event:", error);
@@ -20,7 +21,7 @@ export default function EventForm({ date, onEventAdded }) {
   };
 
   return (
-    <div>
+    <div style={{ marginTop: "20px" }}>
       <h3>הוסף אירוע ליום {new Date(date).toLocaleDateString()}</h3>
       <input
         type="text"

@@ -15,7 +15,7 @@ export default function Day({ day, onClick }) {
     justifyContent: "center",
     alignItems: "center",
     cursor: "pointer",
-    backgroundColor: !day.currentMonth ? "#f0f0f0" : isSaturday ? "#b7e4c7" : "#fff",
+    backgroundColor: !day.currentMonth ? "#f9f9f9" : isSaturday ? "#b7e4c7" : "#fff",
     color: !day.currentMonth ? "#aaa" : "#000",
   };
 
